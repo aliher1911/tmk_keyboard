@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define IS_SPECIAL(code)         ((0xA5 <= (code) && (code) <= 0xDF) || (0xE8 <= (code) && (code) <= 0xFF))
 #define IS_SYSTEM(code)          (KC_PWR       <= (code) && (code) <= KC_WAKE)
 #define IS_CONSUMER(code)        (KC_MUTE      <= (code) && (code) <= KC_BRIGHTNESS_DEC)
+#define IS_APPLE_FN(code)        (KC_APFN      == code)
 #define IS_FN(code)              (KC_FN0       <= (code) && (code) <= KC_FN31)
 #define IS_MOUSEKEY(code)        (KC_MS_UP     <= (code) && (code) <= KC_MS_ACCEL2)
 #define IS_MOUSEKEY_MOVE(code)   (KC_MS_UP     <= (code) && (code) <= KC_MS_RIGHT)
@@ -176,6 +177,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define KC_WFAV KC_WWW_FAVORITES
 #define KC_BRTI KC_BRIGHTNESS_INC
 #define KC_BRTD KC_BRIGHTNESS_DEC
+/* Apple Fn */
+#define KC_APFN KC_APPLE_FN
 /* Jump to bootloader */
 #define KC_BTLD KC_BOOTLOADER
 /* Transparent */
@@ -486,6 +489,9 @@ enum internal_special_keycodes {
     /* 0xE0-E7 for Modifiers. DO NOT USE. */
     /**************************************/
 
+    /* Apple Fn */
+    KC_APPLE_FN         = 0xE8,
+    
     /* Mousekey */
     KC_MS_UP            = 0xF0,
     KC_MS_DOWN,
