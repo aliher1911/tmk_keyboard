@@ -61,7 +61,7 @@ CONFIG_H = config.h
 
 
 # MCU name
-MCU = at90usb1287
+MCU = at90usb1286
 #MCU = atmega32u4
 
 # Processor frequency.
@@ -122,7 +122,7 @@ COMMAND_ENABLE = yes    # Commands for debug and configuration
 #SLEEP_LED_ENABLE = yes  # Breathing sleep LED during USB suspend
 #NKRO_ENABLE = yes	# USB Nkey Rollover
 APPLE_FN_ENABLE = yes   # Enable Apple specific Fn command
-
+SERIAL_ENABLE = yes     # Enable built in serial interface for control
 
 # Optimize size but this may cause error "relocation truncated to fit"
 #EXTRALDFLAGS = -Wl,--relax
