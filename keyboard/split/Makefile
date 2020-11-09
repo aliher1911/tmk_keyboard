@@ -61,7 +61,7 @@ CONFIG_H = config.h
 
 
 # MCU name
-MCU = at90usb1287
+MCU = at90usb1286
 #MCU = atmega32u4
 
 # Processor frequency.
@@ -122,7 +122,10 @@ COMMAND_ENABLE = yes    # Commands for debug and configuration
 #SLEEP_LED_ENABLE = yes  # Breathing sleep LED during USB suspend
 #NKRO_ENABLE = yes	# USB Nkey Rollover
 APPLE_FN_ENABLE = yes   # Enable Apple specific Fn command
-
+REMOTE_ENABLE = yes     # Enable built in serial interface for control
+#CDC_CONSOLE = yes       # Direct console output to setial device as well
+# If using CDC for console, increasing ring buffer is essential to not lose debug data
+#OPT_DEFS += -DCDC_RING_BUFFER_SIZE=256
 
 # Optimize size but this may cause error "relocation truncated to fit"
 #EXTRALDFLAGS = -Wl,--relax
