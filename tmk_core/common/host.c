@@ -103,3 +103,13 @@ uint16_t host_last_consumer_report(void)
 {
     return last_consumer_report;
 }
+
+uint8_t host_send_serial(uint8_t *buffer, uint8_t size) {
+  if (!driver) return 0;
+  return (*driver->send_serial)(buffer, size);
+}
+
+uint8_t host_receive_serial(uint8_t *buffer, uint8_t size) {
+  if (!driver) return 0;
+  return (*driver->receive_serial)(buffer, size);
+}

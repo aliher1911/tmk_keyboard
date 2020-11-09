@@ -58,6 +58,11 @@ else
     endif
 endif
 
+ifeq (yes, $(strip $(SERIAL_ENABLE)))
+    SRC += $(COMMON_DIR)/serial.c
+    OPT_DEFS += -DSERIAL_ENABLE
+endif
+
 ifeq (yes,$(strip $(NO_DEBUG)))
     OPT_DEFS += -DNO_DEBUG
 endif
