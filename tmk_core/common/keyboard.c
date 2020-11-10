@@ -43,6 +43,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef ADB_MOUSE_ENABLE
 #include "adb.h"
 #endif
+#ifdef SERIAL_ENABLED
+#   include "serial.h"
+#endif
 
 
 #ifdef MATRIX_HAS_GHOST
@@ -89,6 +92,10 @@ void keyboard_init(void)
 
 #ifdef BACKLIGHT_ENABLE
     backlight_init();
+#endif
+
+#ifdef ENABLE_SERIAL
+    serial_control_init();
 #endif
 }
 
@@ -170,6 +177,10 @@ void keyboard_task(void)
         adb_mouse_task();
 #endif
 
+#ifdef SERIAL_ENABLE
+	serial_control_task();
+#endif
+	
     // update LED
     if (led_status != host_keyboard_leds()) {
         led_status = host_keyboard_leds();
