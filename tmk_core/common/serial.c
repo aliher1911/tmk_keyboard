@@ -145,18 +145,35 @@ uint8_t read_arg8(uint8_t *cmd, uint8_t size, bool *error) {
   return result;
 }
 
-void process_layer_cmd(uint8_t *cmd, uint8_t size) {
+SerialCommandError process_layer_cmd(uint8_t *cmd, uint8_t size) {
   bool err = false;
-  uint8_t layer = read_arg8(cmd, size, &err);
-  if (err) {
-    push_err(BAD_ARGUMENT);
-  } else {
-    layer_on(layer);
-    push_ok();
+  if (size==0) {
+    return BAD_ARGUMENT;
   }
+  uint8_t operation = cmd[0];
+  uint8_t layer = read_arg8(cmd+1, size-1, &err);
+  if (err) {
+    return BAD_ARGUMENT;
+  } else {
+    switch(operation) {
+    case 'S': // set
+      layer_on(layer);
+      break;
+    case 'R': // reset
+      layer_off(layer);
+      break;
+    case 'T': // toggle
+      layer_invert(layer);
+      break;
+    default:
+      return BAD_ARGUMENT;
+    }
+  }
+  push_ok();
+  return CMD_OK;
 }
 
-// handle command in buffer
+// handle command in buffer by delegating to handle function per type
 void process_cmd(uint8_t *cmd, uint8_t size) {
   if (size < 3) {
     push_err(FRAME);
@@ -166,12 +183,16 @@ void process_cmd(uint8_t *cmd, uint8_t size) {
     push_err(FRAME);
     return;
   }
+  SerialCommandError err;
   uint8_t action = cmd[2];
   switch(action) {
   case 'L':
-    process_layer_cmd(cmd + 3, size - 3);
+    err = process_layer_cmd(cmd + 3, size - 3);
     break;
   default:
+    err = BAD_COMMAND;
+  }
+  if (err) {
     push_err(BAD_COMMAND);
   }
 }
