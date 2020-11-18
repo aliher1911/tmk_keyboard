@@ -58,6 +58,11 @@ else
     endif
 endif
 
+ifeq (yes, $(strip $(REMOTE_ENABLE)))
+    SRC += $(COMMON_DIR)/remote_control.c
+    OPT_DEFS += -DREMOTE_ENABLE
+endif
+
 ifeq (yes,$(strip $(NO_DEBUG)))
     OPT_DEFS += -DNO_DEBUG
 endif

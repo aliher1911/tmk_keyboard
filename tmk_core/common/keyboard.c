@@ -43,6 +43,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef ADB_MOUSE_ENABLE
 #include "adb.h"
 #endif
+#ifdef REMOTE_ENABLE
+#   include "remote_control.h"
+#endif
 
 
 #ifdef MATRIX_HAS_GHOST
@@ -89,6 +92,10 @@ void keyboard_init(void)
 
 #ifdef BACKLIGHT_ENABLE
     backlight_init();
+#endif
+
+#ifdef REMOTE_ENABLE
+    serial_control_init();
 #endif
 }
 
@@ -168,6 +175,10 @@ void keyboard_task(void)
 
 #ifdef ADB_MOUSE_ENABLE
         adb_mouse_task();
+#endif
+
+#ifdef REMOTE_ENABLE
+	serial_control_task();
 #endif
 
     // update LED

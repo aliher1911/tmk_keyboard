@@ -29,6 +29,10 @@ ifeq (yes,$(strip $(CDC_CONSOLE)))
 CDC_ENABLE = yes
 endif
 
+ifeq (yes,$(strip $(REMOTE_ENABLE)))
+CDC_ENABLE = yes
+endif
+
 ifdef CDC_ENABLE
 TMK_LUFA_SRC += $(LUFA_SRC_USBCLASS) \
                 $(TMK_LUFA_DIR)/cdc.c
