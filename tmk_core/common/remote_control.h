@@ -25,10 +25,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 extern "C" {
 #endif
 
-// Command format:
-// 'KB', <cmd>, x, x, x, \n | \r
+/*
+Communication with keyboard
+
+Command fields in ASCII:
+ 'KB', <cmd>, x..., \n | \r
+  |      |    |      |
+  |      |    |      +------ end of frame either \n or \r
+  |      |    +------------- command specific arguments
+  |      +------------------ command
+  +------------------------- KB prefix to filter out garbage
+
+Supported commands:
+L - switch layers in layout
+Fields:
+ S|R|T,<layer>
+   |     |
+   |     +--- layer to change 
+   +--------- character selecting operation Set/Reset/Toggle
+Example commands:
+ KBLS1 - set layer 1 to on
+ KBLT3 - toggle layer 3 state
+
+  */
 
 typedef enum {
+  CMD_OK = 0,
   FRAME = 1,
   OVERFLOW = 2,
   BAD_COMMAND = 3,

@@ -37,7 +37,7 @@ inline uint8_t cmdbuf_at(cmdbuffer_t *buffer, uint8_t index) {
   return buffer->data[index];
 }
 
-inline cmdbuf_splice(cmdbuffer_t *buffer, uint8_t size) {
+inline void cmdbuf_splice(cmdbuffer_t *buffer, uint8_t size) {
   if (buffer->write != size) {
     memcpy(buffer->data, buffer->data + size, size);
   }
@@ -90,18 +90,35 @@ static uint8_t read_arg8(uint8_t *cmd, uint8_t size, bool *error) {
   return result;
 }
 
-static void process_layer_cmd(uint8_t *cmd, uint8_t size) {
+static SerialCommandError process_layer_cmd(uint8_t *cmd, uint8_t size) {
   bool err = false;
-  uint8_t layer = read_arg8(cmd, size, &err);
-  if (err) {
-    push_err(BAD_ARGUMENT);
-  } else {
-    layer_on(layer);
-    push_ok();
+  if (size==0) {
+    return BAD_ARGUMENT;
   }
+  uint8_t operation = cmd[0];
+  uint8_t layer = read_arg8(cmd+1, size-1, &err);
+  if (err) {
+    return BAD_ARGUMENT;
+  } else {
+    switch(operation) {
+    case 'S': // set
+      layer_on(layer);
+      break;
+    case 'R': // reset
+      layer_off(layer);
+      break;
+    case 'T': // toggle
+      layer_invert(layer);
+      break;
+    default:
+      return BAD_ARGUMENT;
+    }
+  }
+  push_ok();
+  return CMD_OK;
 }
 
-// handle command in buffer
+// handle command in buffer by delegating to handle function per type
 static void process_cmd(uint8_t *cmd, uint8_t size) {
   if (size < 3) {
     push_err(FRAME);
@@ -111,12 +128,16 @@ static void process_cmd(uint8_t *cmd, uint8_t size) {
     push_err(FRAME);
     return;
   }
+  SerialCommandError err;
   uint8_t action = cmd[2];
   switch(action) {
   case 'L':
-    process_layer_cmd(cmd + 3, size - 3);
+    err = process_layer_cmd(cmd + 3, size - 3);
     break;
   default:
+    err = BAD_COMMAND;
+  }
+  if (err) {
     push_err(BAD_COMMAND);
   }
 }
@@ -125,21 +146,21 @@ static void process_cmd(uint8_t *cmd, uint8_t size) {
 void serial_control_task(void) {
   // process commands
   uint8_t remaining;
-  uint8_t *buffer = write_pointer(&cmd_buffer, &remaining);
+  uint8_t *buffer = cmdbuf_write_pointer(&cmd_buffer, &remaining);
   if (remaining == 0) {
-    clear(&cmd_buffer);
-    buffer = write_pointer(&cmd_buffer, &remaining);
+    cmdbuf_clear(&cmd_buffer);
+    buffer = cmdbuf_write_pointer(&cmd_buffer, &remaining);
     push_err(OVERFLOW);
   }
   uint8_t received = host_receive_serial(buffer, remaining);
   if (received > 0) {
-    commit(&cmd_buffer, received);
+    cmdbuf_commit(&cmd_buffer, received);
   }
 
   uint8_t first = 0; // unprocessed character
-  uint8_t cmd_size = size(&cmd_buffer);
+  uint8_t cmd_size = cmdbuf_size(&cmd_buffer);
   for(int i=0; i<cmd_size; i++) {
-    uint8_t next_char = at(&cmd_buffer, i);
+    uint8_t next_char = cmdbuf_at(&cmd_buffer, i);
     if (next_char == '\n' || next_char == '\r') {
       if (i - first > 0) {
 	process_cmd(cmd_buffer.data + first, i-first);
@@ -149,6 +170,6 @@ void serial_control_task(void) {
   }
   // discard processed part
   if (first > 0) {
-    splice(&cmd_buffer, first);
+    cmdbuf_splice(&cmd_buffer, first);
   }
 }
