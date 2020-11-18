@@ -49,6 +49,8 @@ void host_keyboard_send(report_keyboard_t *report);
 void host_mouse_send(report_mouse_t *report);
 void host_system_send(uint16_t data);
 void host_consumer_send(uint16_t data);
+uint8_t host_send_serial(uint8_t *buffer, uint8_t size);
+uint8_t host_receive_serial(uint8_t *buffer, uint8_t size);
 
 uint16_t host_last_system_report(void);
 uint16_t host_last_consumer_report(void);

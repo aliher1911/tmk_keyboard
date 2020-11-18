@@ -24,6 +24,16 @@ TMK_LUFA_SRC = $(TMK_LUFA_DIR)/lufa.c \
                $(TMK_LUFA_DIR)/descriptor.c \
                $(LUFA_SRC_USB_DEVICE)
 
+# If debug concole or remote control is enabled, enable cdc feature
+ifeq (yes,$(strip $(CDC_CONSOLE)))
+CDC_ENABLE = yes
+endif
+
+ifdef CDC_ENABLE
+TMK_LUFA_SRC += $(LUFA_SRC_USBCLASS) \
+                $(TMK_LUFA_DIR)/cdc.c
+endif
+
 SRC += $(TMK_LUFA_SRC)
 
 # Search Path
@@ -67,6 +77,14 @@ ifeq (yes,$(strip $(TMK_LUFA_DEBUG_UART)))
     TMK_LUFA_OPTS += -DTMK_LUFA_DEBUG_UART
     # Keep print/debug lines when disabling HID console. See common.mk.
     DEBUG_PRINT_AVAILABLE = yes
+endif
+
+ifdef CDC_ENABLE
+TMK_LUFA_OPTS += -DNO_CLASS_DRIVER_AUTOFLUSH -DCDC_ENABLE
+endif
+
+ifeq (yes,$(strip $(CDC_CONSOLE)))
+TMK_LUFA_OPTS += -DCDC_CONSOLE
 endif
 
 

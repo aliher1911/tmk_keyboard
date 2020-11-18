@@ -12,7 +12,7 @@ typedef struct {
     uint8_t size_mask;
 } ringbuf_t;
 
-static inline void ringbuf_init(ringbuf_t *buf, uint8_t *array, uint8_t size);
+static inline void ringbuf_init(ringbuf_t *buf, uint8_t *array, uint16_t size);
 static inline int16_t ringbuf_get(ringbuf_t *buf);
 static inline bool ringbuf_put(ringbuf_t *buf, uint8_t data);
 static inline void ringbuf_write(ringbuf_t *buf, uint8_t data);
@@ -20,7 +20,7 @@ static inline bool ringbuf_is_empty(ringbuf_t *buf);
 static inline bool ringbuf_is_full(ringbuf_t *buf);
 static inline void ringbuf_reset(ringbuf_t *buf);
 
-static inline void ringbuf_init(ringbuf_t *buf, uint8_t *array, uint8_t size)
+static inline void ringbuf_init(ringbuf_t *buf, uint8_t *array, uint16_t size)
 {
     buf->buffer = array;
     buf->head = 0;
@@ -69,5 +69,16 @@ static inline void ringbuf_reset(ringbuf_t *buf)
 {
     buf->head = 0;
     buf->tail = 0;
+}
+// get contiguous chunk pointer and size
+static inline uint8_t* ringbuf_peek_data(ringbuf_t *buf, uint8_t *size) {
+    *size = (buf->head >= buf->tail)
+      ? (buf->head - buf->tail)
+      : (uint16_t)buf->size_mask + 1 - buf->tail;
+    return buf->buffer + buf->tail;
+}
+// skip data chunk, if you skip more than data available all bets are off
+static inline void ringbuf_skip_data(ringbuf_t *buf, uint8_t count) {
+    buf->tail = (buf->tail + count) & buf->size_mask; 
 }
 #endif

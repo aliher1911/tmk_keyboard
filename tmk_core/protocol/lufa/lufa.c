@@ -60,6 +60,10 @@
 #include "uart.h"
 #endif
 
+#ifdef CDC_ENABLE
+#include "cdc.h"
+#endif
+
 #include "matrix.h"
 #include "descriptor.h"
 #include "lufa.h"
@@ -82,12 +86,19 @@ static void send_keyboard(report_keyboard_t *report);
 static void send_mouse(report_mouse_t *report);
 static void send_system(uint16_t data);
 static void send_consumer(uint16_t data);
+#ifndef CDC_ENABLE
+uint8_t send_serial(uint8_t *buffer, uint8_t size);
+uint8_t receive_serial(uint8_t *buffer, uint8_t size);
+#endif
+
 host_driver_t lufa_driver = {
     keyboard_leds,
     send_keyboard,
     send_mouse,
     send_system,
-    send_consumer
+    send_consumer,
+    send_serial,
+    receive_serial
 };
 
 
@@ -358,6 +369,10 @@ void EVENT_USB_Device_ConfigurationChanged(void)
     ConfigSuccess &= ENDPOINT_CONFIG(NKRO_IN_EPNUM, EP_TYPE_INTERRUPT, ENDPOINT_DIR_IN,
                                      NKRO_EPSIZE, ENDPOINT_BANK_SINGLE);
 #endif
+
+#ifdef CDC_ENABLE
+    ConfigSuccess &= cdc_configure_endpoint();
+#endif
 }
 
 /*
@@ -497,6 +512,9 @@ void EVENT_USB_Device_ControlRequest(void)
 
             break;
     }
+#ifdef CDC_ENABLE
+    cdc_control_request();
+#endif
 }
 
 /*******************************************************************************
@@ -616,7 +634,6 @@ static void send_consumer(uint16_t data)
 #endif
 }
 
-
 /*******************************************************************************
  * sendchar
  ******************************************************************************/
@@ -634,6 +651,10 @@ int8_t sendchar(uint8_t c)
     console_putc(c);
     #endif
 
+    #ifdef CDC_CONSOLE
+    cdc_sendchar(c);
+    #endif
+    
     return 0;
 }
 
@@ -718,12 +739,25 @@ int main(void)
         console_task();
 #endif
 
+#ifdef CDC_ENABLE
+        serial_usb_task();
+#endif
+	
 #if !defined(INTERRUPT_CONTROL_ENDPOINT)
         USB_USBTask();
 #endif
     }
 }
 
+/* optional host features */
+__attribute__((weak))
+uint8_t send_serial(uint8_t *buffer, uint8_t size) {
+  return 0;
+}
+__attribute__((weak))
+uint8_t receive_serial(uint8_t *buffer, uint8_t size) {
+  return 0;
+}
 
 /* hooks */
 __attribute__((weak))

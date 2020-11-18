@@ -28,6 +28,8 @@ typedef struct {
     void (*send_mouse)(report_mouse_t *);
     void (*send_system)(uint16_t);
     void (*send_consumer)(uint16_t);
+    uint8_t (*send_serial)(uint8_t *buffer, uint8_t size);
+    uint8_t (*receive_serial)(uint8_t *buffer, uint8_t size);
 } host_driver_t;
 
 #endif
